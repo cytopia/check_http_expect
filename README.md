@@ -21,3 +21,52 @@ Usage:  check_http_expect --url=<url> --find=<string> [--huser=<user>] [--hpass=
   --lurl        (Optional) Url for POST login
   --ldata       (Optional) POST data (can be specified multiple times)
 ```
+
+## Examples
+
+Check if a website contains the word `google`
+```shell
+$ check_http_expect --url=https://google.com --find=google
+[OK] 1 match found for: "google".
+Http version:  HTTP/1.1
+Http code:     302
+Http info:     Found
+Server:        GFE/2.0
+Url:           https://google.com
+Search:        google
+Num matches:   1
+Matches:
+----------------------------------------
+<A HREF=https://www.google.de/?gfe_rd=cr&amp;ei=B9AxVr7RJerj8weKoa2IBA>here</A>
+```
+
+Check if a website contains the the following regex `[0-9]+`
+```shell
+$ check_http_expect --url=https://google.com --find='[0-9]+'
+[OK] 4 matches found for: "[0-9]+".
+Http version:  HTTP/1.1
+Http code:     302
+Http info:     Found
+Server:        GFE/2.0
+Url:           https://google.com
+Search:        [0-9]+
+Num matches:   4
+Matches:
+----------------------------------------
+<HTML><HEAD><meta http-equiv=content-type content=text/html;charset=utf-8> <TITLE>302 Moved</TITLE></HEAD><BODY> <H1>302 Moved</H1> <A HREF=https://www.google.de/?gfe_rd=cr&amp;ei=Q9AxVs-AAurj8weKoa2IBA>here</A>.
+```
+
+Check behind a .htaccess protected website for the string `Your site is secured`
+```
+check_http_expect --url="http://www.example.com" --find='[0-9]+' --huser=john --hpass="Password"
+[ERROR] No matches found for: "[0-9]+".
+Http version:  HTTP/1.1
+Http code:     302
+Http info:     Found
+Server:        Apache/2.4.16 (Amazon) PHP/5.5.30
+Url:           http://www.example.com
+Search:        [0-9]+
+Num matches:   0
+Matches:
+----------------------------------------
+```
