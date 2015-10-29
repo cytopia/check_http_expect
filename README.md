@@ -84,3 +84,5 @@ Search:        Your site is secured
 Num matches:   0
 Matches:
 ```
+
+**Note:** htaccess and POST login can also be combined.
