@@ -99,7 +99,7 @@ if [ ! -z "${lurl}" ]; then
 	rm -f cookie.jar
 else
 	# Connect and curl
-	output="$(curl ${curl_args} -i -s "${url}")"
+	output="$(curl "${curl_args}" -i -s "${url}")"
 fi
 
 # Split header and content
