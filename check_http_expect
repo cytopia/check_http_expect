@@ -70,9 +70,9 @@ fi
 
 # Add htacess parameters
 if [ ! -z "$huser" ] || [ ! -z "$hpass" ]; then
-	curl_args="--user \"${huser}:${hpass}\""
+	curl_args="--user-agent \"Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.6) Gecko/20070725 Firefox/2.0.0.6\" --user \"${huser}:${hpass}\""
 else
-	curl_args=""
+	curl_args="--user-agent \"Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.6) Gecko/20070725 Firefox/2.0.0.6\""
 fi
 
 # Login required?
@@ -134,6 +134,7 @@ echo "Http code:     ${http_code}"
 echo "Http info:     ${http_info}"
 echo "Server:        ${http_server}"
 echo "Url:           ${url}"
+#echo "Post Data:     ${ldata}"
 echo "Search:        ${find}"
 echo "Num matches:   ${number}"
 echo "Matches:"
