@@ -9,7 +9,7 @@
 Nagios plugin that will check a website (behind .htacess and/or behind POST login) for an expected string based on a simple string or regex expression.
 
 
-## Usage
+## 1. Usage
 
 ```shell
 Usage:  check_http_expect --url=<url> --find=<string> [--huser=<user>] [--hpass=<pass>] [--lurl=<url>] [--ldata==<data> [--ldata=<data>]]
@@ -22,7 +22,9 @@ Usage:  check_http_expect --url=<url> --find=<string> [--huser=<user>] [--hpass=
   --ldata       (Optional) POST data (can be specified multiple times)
 ```
 
-## Generic Examples
+## 2. Generic Examples
+
+### 2.1 Search simple string
 
 Check if a website contains the word `google`
 ```shell
@@ -40,6 +42,8 @@ Matches:
 <A HREF=https://www.google.de/?gfe_rd=cr&amp;ei=B9AxVr7RJerj8weKoa2IBA>here</A>
 ```
 
+### 2.2 Search via regex
+
 Check if a website contains the the following regex `[0-9]+`
 ```shell
 $ check_http_expect --url=https://google.com --find='[0-9]+'
@@ -56,6 +60,8 @@ Matches:
 <HTML><HEAD><meta http-equiv=content-type content=text/html;charset=utf-8> <TITLE>302 Moved</TITLE></HEAD><BODY> <H1>302 Moved</H1> <A HREF=https://www.google.de/?gfe_rd=cr&amp;ei=Q9AxVs-AAurj8weKoa2IBA>here</A>.
 ```
 
+### 2.3 .htaccess protection
+
 Check behind a .htaccess protected website for the string `Your site is secured`
 ```
 $ check_http_expect --url="http://www.example.com" --find='Your site is secured' --huser=john --hpass="Password"
@@ -70,6 +76,8 @@ Num matches:   0
 Matches:
 ----------------------------------------
 ```
+
+### 2.4 POST Login
 
 Login to at `http://www.example.com/login.php` with POST data `usernameFieldName=John`, `passwordFieldName=pass`, `submit=1`, go to `http://www.example.com` and check for the regex `[0-9]+`
 ```
@@ -88,9 +96,11 @@ Matches:
 **Note:** htaccess and POST login can also be combined.
 
 
-## Specific Examples
+## 3. Specific Examples
 
-### Find String in Wordpress.com dashboard
+### 3.1 Log into wordpress.com
+
+Find String in Wordpress.com dashboard
 
 ```shell
 $ check_http_expect --url="https://dashboard.wordpress.com/wp-admin/" --find="Recently Published" --lurl="https://wordpress.com/wp-login.php" --ldata="log=USER@EMAIL" --ldata="pwd=PASSWORD" --ldata="rememberme=forever" --ldata="testcookie=1"
