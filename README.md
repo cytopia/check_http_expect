@@ -58,14 +58,14 @@ Matches:
 
 Check behind a .htaccess protected website for the string `Your site is secured`
 ```
-check_http_expect --url="http://www.example.com" --find='[0-9]+' --huser=john --hpass="Password"
+check_http_expect --url="http://www.example.com" --find='Your site is secured' --huser=john --hpass="Password"
 [ERROR] No matches found for: "[0-9]+".
 Http version:  HTTP/1.1
 Http code:     302
 Http info:     Found
 Server:        Apache/2.4.16 (Amazon) PHP/5.5.30
 Url:           http://www.example.com
-Search:        [0-9]+
+Search:        Your site is secured
 Num matches:   0
 Matches:
 ----------------------------------------
