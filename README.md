@@ -58,8 +58,8 @@ Matches:
 
 Check behind a .htaccess protected website for the string `Your site is secured`
 ```
-check_http_expect --url="http://www.example.com" --find='Your site is secured' --huser=john --hpass="Password"
-[ERROR] No matches found for: "[0-9]+".
+$ check_http_expect --url="http://www.example.com" --find='Your site is secured' --huser=john --hpass="Password"
+[ERROR] No matches found for: "Your site is secured".
 Http version:  HTTP/1.1
 Http code:     302
 Http info:     Found
@@ -69,4 +69,18 @@ Search:        Your site is secured
 Num matches:   0
 Matches:
 ----------------------------------------
+```
+
+Login to at `http://www.example.com/login.php` with POST data `usernameFieldName=John`, `passwordFieldName=pass`, `submit=1`, go to `http://www.example.com` and check for the regex `[0-9]+`
+```
+$ check_http_expect --url="http://www.example.com" --find='[0-9]+' --lurl="http://www.example.com/login.php" --ldata="usernameFieldName=John" --ldata="passwordFieldName=pass" --ldata="submit=1"
+[ERROR] No matches found for: "[0-9]+".
+Http version:  HTTP/1.1
+Http code:     302
+Http info:     Found
+Server:        Apache/2.4.16 (Amazon) PHP/5.5.30
+Url:           http://www.example.com
+Search:        Your site is secured
+Num matches:   0
+Matches:
 ```
