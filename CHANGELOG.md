@@ -1,4 +1,9 @@
-Version 0.1 (unreleased)
+Version 0.2 (unreleased)
+-----------
+
+
+
+Version 0.1
 -----------
 
 - [Enh]     Be able to find a string via `grep -E`-style regex
