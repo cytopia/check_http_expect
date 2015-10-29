@@ -1,0 +1,15 @@
+{
+	"name": "cytopia/check_http_expect",
+	"description": "Nagios plugin to check for a string/regex on a webpage. Also works behind .htaccess and POST login.",
+	"type": "library",
+	"keywords": ["nagios", "nagios-plugin", "icinga", "http", "http POST", "http htaccess"],
+	"homepage": "https://github.com/cytopia/check_http_expect",
+	"license": "MIT",
+	"authors": [
+		{
+			"name" : "Patrick Plocke",
+			"homepage": "https://github.com/cytopia",
+			"role": "Developer"
+		}
+	]
+}

@@ -1,0 +1,144 @@
+#!/bin/sh
+
+usage() {
+	echo "Usage:  check --url=<url> --find=<string> [--huser=<user>] [--hpass=<pass>] [--lurl=<url>] [--ldata==<data> [--ldata=<data>]]"
+	echo
+	echo "  --url         Target URL"
+	echo "  --find        Find string in source of Target URL ('grep -E'-style regex allowed)"
+	echo "  --huser       (Optional) htaccess username"
+	echo "  --hpass       (Optional) htaccess password"
+	echo "  --lurl        (Optional) Url for POST login"
+	echo "  --ldata       (Optional) POST data (can be specified multiple times)"
+}
+
+while [ $# -gt 0  ]; do
+	case "$1" in
+
+		# Final target url
+		--url=*)
+			url="$(echo "${1}" | sed 's/^--url=//g')"
+			;;
+
+		# Post parameter
+		--lurl=*)
+			lurl="$(echo "${1}" | sed 's/^--lurl=//g')"
+			;;
+		--ldata=*)
+			# Append multiple data fields
+			if [ -z "$ldata" ]; then
+				ldata="--data \"$(echo "${1}" | sed 's/^--ldata=//g')\""
+			else
+				ldata="${ldata} --data \"$(echo "${1}" | sed 's/^--ldata=//g')\""
+			fi
+			;;
+
+		# Htaccess parameters
+		--huser=*)
+			huser="$(echo "${1}" | sed 's/^--huser=//g')"
+			;;
+		--hpass=*)
+			hpass="$(echo "${1}" | sed 's/^--hpass=//g')"
+			;;
+
+		# String to look for on final url
+		--find=*)
+			find="$(echo "${1}" | sed 's/^--find=//g')"
+			;;
+		*)
+			echo "Invalid argument: '${1}'"
+			usage
+			exit 1
+			;;
+	esac
+	shift
+done
+
+
+if [ -z "$url" ]; then
+	echo "Error, You must specify an Url."
+	usage
+	exit 1
+fi
+
+if [ -z "$find" ]; then
+	echo "Error, You must specify what you are looking for."
+	usage
+	exit 1
+fi
+
+
+
+# Add htacess parameters
+if [ ! -z "$huser" ] || [ ! -z "$hpass" ]; then
+	curl_args="--user \"${huser}:${hpass}\""
+else
+	curl_args=""
+fi
+
+# Login required?
+if [ ! -z "${lurl}" ]; then
+	login="curl -s -i ${curl_args}"
+	login="${login} --cookie     cookie.jar"
+	login="${login} --cookie-jar cookie.jar"
+	login="${login} --location"
+	login="${login} ${ldata}"
+	login="${login} ${lurl}"
+
+	crawl="curl -s -i ${curl_args}"
+	crawl="${crawl} --cookie     cookie.jar"
+	crawl="${crawl} --cookie-jar cookie.jar"
+	crawl="${crawl} --location"
+	crawl="${crawl} ${url}"
+
+	# No fucking idea why the login only works, when it is called twice??
+	eval "${login}" > /dev/null
+	eval "${login}" > /dev/null
+
+
+	output="$(eval "${crawl}")"
+	rm -f cookie.jar
+else
+	# Connect and curl
+	output="$(curl ${curl_args} -i -s "${url}")"
+fi
+
+# Split header and content
+head="$(echo "${output}" | awk '{if($0=="\r")exit;print}')"
+data="$(echo "${output}" | awk '{if(body)print;if($0=="\r")body=1}')"
+
+http_status="$(echo "${head}" | head -n1)"
+http_version="$(echo "${http_status}" | awk '{print $1}')"
+http_code="$(echo "${http_status}" | awk '{print $2}')"
+http_info="$(echo "${http_status}" | awk '{for (i=3; i<NF; i++) printf $i " "; print $NF}')"
+http_server="$(echo "${head}" | head -n20 | grep -E '^Server:\s' | sed 's/^Server:\s//g')"
+
+
+
+number="$(echo "${data}" | grep -cE "${find}")"
+match="$(echo "${data}" | grep -E "${find}" | xargs)"
+
+if [ "$number" -gt 0 ]; then
+	if [ "$number" = "1" ]; then
+		echo "[OK] 1 match found for: \"${find}\"."
+	else
+		echo "[OK] ${number} matches found for: \"${find}\"."
+	fi
+	EXIT=0
+else
+	echo "[ERROR] No matches found for: \"${find}\"."
+	EXIT=2
+fi
+
+echo "Http version:  ${http_version}"
+echo "Http code:     ${http_code}"
+echo "Http info:     ${http_info}"
+echo "Server:        ${http_server}"
+echo "Url:           ${find}"
+echo "Search:        ${find}"
+echo "Num matches:   ${number}"
+echo "Matches:"
+echo "----------------------------------------"
+echo "${match}"
+
+exit "$EXIT"
+
