@@ -22,7 +22,7 @@ Usage:  check_http_expect --url=<url> --find=<string> [--huser=<user>] [--hpass=
   --ldata       (Optional) POST data (can be specified multiple times)
 ```
 
-## Examples
+## Generic Examples
 
 Check if a website contains the word `google`
 ```shell
@@ -86,3 +86,23 @@ Matches:
 ```
 
 **Note:** htaccess and POST login can also be combined.
+
+
+## Specific Examples
+
+### Find String in Wordpress.com dashboard
+
+```shell
+$ check_http_expect --url="https://dashboard.wordpress.com/wp-admin/" --find="Recently Published" --lurl="https://wordpress.com/wp-login.php" --ldata="log=USER@EMAIL" --ldata="pwd=PASSWORD" --ldata="rememberme=forever" --ldata="testcookie=1"
+[OK] 1 match found for: "Recently Published".
+Http version:  HTTP/1.1
+Http code:     200
+Http info:     OK
+Server:        nginx
+Url:           https://dashboard.wordpress.com/wp-admin/
+Search:        Recently Published
+Num matches:   1
+Matches:
+----------------------------------------
+<div id=activity-widget><div id=published-posts class=activity-block><h4>Recently Published</h4><ul><li><span>Feb 20th, 1:41 am</span> <a href=https://dashboard.wordpress.com/2014/02/20/test/>Test</a></li><li><span>Jun 2nd, 6:10 pm</span> <a href=https://dashboard.wordpress.com/2011/06/02/life-would-be-so-different-if-everyone-j/>Life would be so different if everyone j</a></li><li><span>Jun 1st, 10:08 pm</span> <a href=https://dashboard.wordpress.com/2011/06/01/for-those-of-you-who-are-still-paying-re/>for those of you who are still paying re</a></li><li><span>Jun 1st, 9:52 pm</span> <a href=https://dashboard.wordpress.com/2011/06/01/having-a-great-day-so-far-and-i-hope-all/>Having a great day so far and I hope all</a></li><li><span>May 26th, 10:37 pm</span> <a href=https://dashboard.wordpress.com/2011/05/26/in-this-video-you-will-find-out-how-to-r/>In this video you will find out how to r</a></li></ul></div></div></div>
+```
