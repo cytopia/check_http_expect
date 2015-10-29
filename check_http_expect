@@ -1,7 +1,7 @@
 #!/bin/sh
 
 usage() {
-	echo "Usage:  check --url=<url> --find=<string> [--huser=<user>] [--hpass=<pass>] [--lurl=<url>] [--ldata==<data> [--ldata=<data>]]"
+	echo "Usage:  check_http_expect --url=<url> --find=<string> [--huser=<user>] [--hpass=<pass>] [--lurl=<url>] [--ldata==<data> [--ldata=<data>]]"
 	echo
 	echo "  --url         Target URL"
 	echo "  --find        Find string in source of Target URL ('grep -E'-style regex allowed)"
