@@ -1,6 +1,13 @@
-Version 0.2 (unreleased)
+Version 0.3 (unreleased)
 -----------
 
+
+
+Version 0.2
+-----------
+
+- [Fix]		Fixed useragent escaping for normal request
+- [Enh]		Code cleaning
 
 
 Version 0.1

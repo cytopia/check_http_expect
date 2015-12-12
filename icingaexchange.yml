@@ -1,0 +1,19 @@
+name: check_http_expect
+description: "file:///README.md"
+url: "https://github.com/cytopia/check_http_expect"
+tags: Web, Http
+vendor: Linux
+target: Operating System
+type: Plugin
+license: MIT
+releases:
+  -
+    name: 0.4
+    description: "0.2 Release"
+    files:
+      -
+        name: check_http_expect
+        url: "file:///check_http_expect"
+        description: "Second release"
+        checksum: e6ddf9c3b5fedf35df408fbd67dc7097
+
