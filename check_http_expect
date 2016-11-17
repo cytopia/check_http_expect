@@ -87,14 +87,14 @@ print_help() {
 	printf "Check a website (behind .htacess and/or behind POST login) for\n"
 	printf "an expected string or regex expression.\n\n"
 
-	# Show detauls
+	# Show defaults
 	printf "  --url                  Target URL\n"
 	printf "  --find                 Find string in source of Target URL ('grep -E'-style regex allowed)\n"
 	printf "  --huser                [optional] htaccess username\n"
 	printf "  --hpass                [optional] htaccess password\n"
 	printf "  --lurl                 [optional] Url for POST login\n"
-	printf "  --ldata                [optional] POST data (can be specified multiple times)\n\n"
-	printf "  --cookie		 [optional] set cookies for request\n"
+	printf "  --ldata                [optional] POST data (can be specified multiple times)\n"
+	printf "  --cookie		 [optional] set cookies for request\n\n"
 
 	printf "  --check                Check for program requirements.\n"
 	printf "  --help                 Show this help\n"
