@@ -181,7 +181,7 @@ while [ $# -gt 0  ]; do
 			;;
 		# Cookies
 		--cookie)
-			if [ -z "$cookies"]; then
+			if [ -z "$cookies" ]; then
 				cookies="--cookie \"$1\""
 			else
 				cookies="${cookies} --cookie \"$1\""
