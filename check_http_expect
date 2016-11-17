@@ -226,7 +226,7 @@ else
 fi
 
 # Add cookies
-if [ ! -z "$cookies"]; then
+if [ ! -z "$cookies" ]; then
 	curl_args="${curl_args} ${cookies}"
 fi
 
