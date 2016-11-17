@@ -12,9 +12,10 @@
 INFO_NAME="check_http_expect"
 INFO_AUTHOR="Patrick Plocke <patrick@plocke.de>"
 INFO_GPGKEY="0x28BF179F"
-INFO_DATE="2015-12-12"
+INFO_DATE="2016-11-17"
+INFO_LAST_EDITOR="Mathias Scherer <scherer.mat@gmail.com>"
 INFO_LICENSE="MIT"
-INFO_VERSION="0.2"
+INFO_VERSION="0.3"
 
 # Get the path
 export PATH="$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin"
@@ -56,6 +57,7 @@ print_version() {
 	printf "Name:    %s\n" "${INFO_NAME}"
 	printf "Version: %s (%s)\n" "${INFO_VERSION}" "${INFO_DATE}"
 	printf "Author:  %s (%s)\n" "${INFO_AUTHOR}" "${INFO_GPGKEY}"
+	printf "Last Editor: %s\n" "${INFO_LAST_EDITOR}"
 	printf "License: %s\n" "${INFO_LICENSE}"
 	return 0
 }
@@ -65,7 +67,7 @@ print_version() {
 # @output string  The usage screen.
 # @return integer 0
 print_usage() {
-	printf "Usage:  check_http_expect --url=<url> --find=<string> [--huser=<user>] [--hpass=<pass>] [--lurl=<url>] [--ldata==<data> [--ldata=<data>]]\n"
+	printf "Usage:  check_http_expect --url <url> --find <string> [--huser <user>] [--hpass <pass>] [--lurl <url>] [--ldata <data> [--ldata <data>]]\n"
 	printf "OR      %s --check\n" "${INFO_NAME}"
 	printf "OR      %s --help\n" "${INFO_NAME}"
 	printf "OR      %s --version\n\n" "${INFO_NAME}"
@@ -142,37 +144,39 @@ fi
 ############################################################
 
 while [ $# -gt 0  ]; do
-	case "$1" in
+	key=$1
+	shift
+	case $key in
 
 		# Final target url
-		--url=*)
-			url="$(echo "${1}" | sed 's/^--url=//g')"
+		--url)
+			url="$1"
 			;;
 
 		# Post parameter
-		--lurl=*)
-			lurl="$(echo "${1}" | sed 's/^--lurl=//g')"
+		--lurl)
+			lurl="$1"
 			;;
-		--ldata=*)
+		--ldata)
 			# Append multiple data fields
 			if [ -z "$ldata" ]; then
-				ldata="--data \"$(echo "${1}" | sed 's/^--ldata=//g')\""
+				ldata="--data \"$1\""
 			else
-				ldata="${ldata} --data \"$(echo "${1}" | sed 's/^--ldata=//g')\""
+				ldata="${ldata} --data \"$1\""
 			fi
 			;;
 
 		# Htaccess parameters
-		--huser=*)
-			huser="$(echo "${1}" | sed 's/^--huser=//g')"
+		--huser)
+			huser="$1"
 			;;
-		--hpass=*)
-			hpass="$(echo "${1}" | sed 's/^--hpass=//g')"
+		--hpass)
+			hpass="$1"
 			;;
 
 		# String to look for on final url
-		--find=*)
-			find="$(echo "${1}" | sed 's/^--find=//g')"
+		--find)
+			find="$1"
 			;;
 		*)
 			echo "Invalid argument: '${1}'"
