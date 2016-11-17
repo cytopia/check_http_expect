@@ -67,7 +67,7 @@ print_version() {
 # @output string  The usage screen.
 # @return integer 0
 print_usage() {
-	printf "Usage:  check_http_expect --url <url> --find <string> [--huser <user>] [--hpass <pass>] [--lurl <url>] [--ldata <data> [--ldata <data>]]\n"
+	printf "Usage:  check_http_expect --url <url> --find <string> [--huser <user>] [--hpass <pass>] [--lurl <url>] [--cookie <data> [--cookie <data>]][--ldata <data> [--ldata <data>]]\n"
 	printf "OR      %s --check\n" "${INFO_NAME}"
 	printf "OR      %s --help\n" "${INFO_NAME}"
 	printf "OR      %s --version\n\n" "${INFO_NAME}"
@@ -94,6 +94,7 @@ print_help() {
 	printf "  --hpass                [optional] htaccess password\n"
 	printf "  --lurl                 [optional] Url for POST login\n"
 	printf "  --ldata                [optional] POST data (can be specified multiple times)\n\n"
+	printf "  --cookie		 [optional] set cookies for request\n"
 
 	printf "  --check                Check for program requirements.\n"
 	printf "  --help                 Show this help\n"
@@ -178,6 +179,14 @@ while [ $# -gt 0  ]; do
 		--find)
 			find="$1"
 			;;
+		# Cookies
+		--cookie)
+			if [ -z "$cookies"]; then
+				cookies="--cookie \"$1\""
+			else
+				cookies="${cookies} --cookie \"$1\""
+			fi
+			;;
 		*)
 			echo "Invalid argument: '${1}'"
 			print_usage
@@ -214,6 +223,11 @@ if [ ! -z "$huser" ] || [ ! -z "$hpass" ]; then
 	curl_args="--user-agent \"Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.6) Gecko/20070725 Firefox/2.0.0.6\" --user \"${huser}:${hpass}\""
 else
 	curl_args="--user-agent \"Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.6) Gecko/20070725 Firefox/2.0.0.6\""
+fi
+
+# Add cookies
+if [ ! -z "$cookies"]; then
+	curl_args="${curl_args} ${cookies}"
 fi
 
 # Login required?
