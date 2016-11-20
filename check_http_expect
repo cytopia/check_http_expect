@@ -1,6 +1,5 @@
 #!/bin/sh
 
-# TODO: check against curl
 
 ################################################################################
 #
@@ -12,9 +11,9 @@
 INFO_NAME="check_http_expect"
 INFO_AUTHOR="Patrick Plocke <patrick@plocke.de>"
 INFO_GPGKEY="0x28BF179F"
-INFO_DATE="2015-12-12"
+INFO_DATE="2015-12-13"
 INFO_LICENSE="MIT"
-INFO_VERSION="0.2"
+INFO_VERSION="0.3"
 
 # Get the path
 export PATH="$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin"
@@ -65,7 +64,7 @@ print_version() {
 # @output string  The usage screen.
 # @return integer 0
 print_usage() {
-	printf "Usage:  check_http_expect --url=<url> --find=<string> [--huser=<user>] [--hpass=<pass>] [--lurl=<url>] [--ldata==<data> [--ldata=<data>]]\n"
+	printf "Usage:  check_http_expect --url=<url> --find=<string> [--reg=grepE] [--huser=<user>] [--hpass=<pass>] [--lurl=<url>] [--ldata==<data> [--ldata=<data>]]\n"
 	printf "OR      %s --check\n" "${INFO_NAME}"
 	printf "OR      %s --help\n" "${INFO_NAME}"
 	printf "OR      %s --version\n\n" "${INFO_NAME}"
@@ -88,6 +87,9 @@ print_help() {
 	# Show detauls
 	printf "  --url                  Target URL\n"
 	printf "  --find                 Find string in source of Target URL ('grep -E'-style regex allowed)\n"
+	printf "  --reg                  [optional] Find method. Default is 'grepE'. Possible values:\n"
+	printf "                         reg=grepE (uses grep -E '')s\n"
+	printf "                         reg=sedN (uses sed -n '')\n"
 	printf "  --huser                [optional] htaccess username\n"
 	printf "  --hpass                [optional] htaccess password\n"
 	printf "  --lurl                 [optional] Url for POST login\n"
@@ -159,6 +161,15 @@ while [ $# -gt 0  ]; do
 				ldata="--data \"$(echo "${1}" | sed 's/^--ldata=//g')\""
 			else
 				ldata="${ldata} --data \"$(echo "${1}" | sed 's/^--ldata=//g')\""
+			fi
+			;;
+
+		--reg=*)
+			# Regex method
+			reg="$(echo "${1}" | sed 's/^--reg=//g')"
+			if [ "$reg" != "grepE" ] && [ "$reg" != "sedN" ]; then
+				printf "Unknown value for --reg. Only 'grepE' and 'sedN' are supported.\n"
+				exit $EXIT_UNKNOWN
 			fi
 			;;
 
@@ -238,7 +249,6 @@ else
 	# Connect and curl
 	crawl="curl -s -i ${curl_args} ${url}"
 	output="$(eval "${crawl}")"
-	#output="$(curl "${curl_args}" -i -s "${url}")"
 fi
 
 # Split header and content
@@ -254,7 +264,15 @@ http_server="$(echo "${head}" | head -n20 | grep -E '^Server:\s' | sed 's/^Serve
 
 
 number="$(echo "${data}" | grep -cE "${find}")"
-match="$(echo "${data}" | grep -E "${find}" | xargs)"
+#match="$(echo "${data}" | grep -E "${find}" | xargs)"
+#match="$(echo "${data}" | grep -E "${find}")"
+
+if [ "$reg" = "grepE" ]; then
+	match="$(echo "${data}" | grep -E "${find}")"
+elif [ "$reg" = "sedN" ]; then
+	match="$(echo "${data}" | sed -n "${find}")"
+fi
+
 
 if [ "$number" -gt 0 ]; then
 	if [ "$number" = "1" ]; then
@@ -273,7 +291,6 @@ echo "Http code:     ${http_code}"
 echo "Http info:     ${http_info}"
 echo "Server:        ${http_server}"
 echo "Url:           ${url}"
-#echo "Post Data:     ${ldata}"
 echo "Search:        ${find}"
 echo "Num matches:   ${number}"
 echo "Matches:"
