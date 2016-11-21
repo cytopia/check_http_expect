@@ -12,7 +12,7 @@ Nagios plugin that will check a website (behind .htacess and/or behind POST logi
 ## 1. Usage
 
 ```shell
-Usage:  check_http_expect --url=<url> --find=<string> [--huser=<user>] [--hpass=<pass>] [--lurl=<url>] [--ldata==<data> [--ldata=<data>]]
+Usage:  check_http_expect --url <url> --find <string> [--huser <user>] [--hpass <pass>] [--lurl <url>] [--cookie <cookie-string> [--cookie <cookie-string>]] [--ldata <data> [--ldata <data>]]
 
   --url         Target URL
   --find        Find string in source of Target URL ('grep -E'-style regex allowed)
@@ -20,6 +20,7 @@ Usage:  check_http_expect --url=<url> --find=<string> [--huser=<user>] [--hpass=
   --hpass       (Optional) htaccess password
   --lurl        (Optional) Url for POST login
   --ldata       (Optional) POST data (can be specified multiple times)
+  --cookie      (Optional) set cookies for request
 ```
 
 ## 2. Generic Examples
@@ -28,7 +29,7 @@ Usage:  check_http_expect --url=<url> --find=<string> [--huser=<user>] [--hpass=
 
 Check if a website contains the word `google`
 ```shell
-$ check_http_expect --url=https://google.com --find=google
+$ check_http_expect --url https://google.com --find google
 [OK] 1 match found for: "google".
 Http version:  HTTP/1.1
 Http code:     302
@@ -46,7 +47,7 @@ Matches:
 
 Check if a website contains the the following regex `[0-9]+`
 ```shell
-$ check_http_expect --url=https://google.com --find='[0-9]+'
+$ check_http_expect --url https://google.com --find '[0-9]+'
 [OK] 4 matches found for: "[0-9]+".
 Http version:  HTTP/1.1
 Http code:     302
@@ -64,7 +65,7 @@ Matches:
 
 Check behind a .htaccess protected website for the string `Your site is secured`
 ```
-$ check_http_expect --url="http://www.example.com" --find='Your site is secured' --huser=john --hpass="Password"
+$ check_http_expect --url "http://www.example.com" --find 'Your site is secured' --huser john --hpass "Password"
 [ERROR] No matches found for: "Your site is secured".
 Http version:  HTTP/1.1
 Http code:     302
@@ -81,7 +82,7 @@ Matches:
 
 Login to at `http://www.example.com/login.php` with POST data `usernameFieldName=John`, `passwordFieldName=pass`, `submit=1`, go to `http://www.example.com` and check for the regex `[0-9]+`
 ```
-$ check_http_expect --url="http://www.example.com" --find='[0-9]+' --lurl="http://www.example.com/login.php" --ldata="usernameFieldName=John" --ldata="passwordFieldName=pass" --ldata="submit=1"
+$ check_http_expect --url "http://www.example.com" --find '[0-9]+' --lurl "http://www.example.com/login.php" --ldata  "usernameFieldName=John" --ldata "passwordFieldName=pass" --ldata "submit=1"
 [ERROR] No matches found for: "[0-9]+".
 Http version:  HTTP/1.1
 Http code:     302
@@ -95,6 +96,22 @@ Matches:
 
 **Note:** htaccess and POST login can also be combined.
 
+### 2.5 Set Cookies
+Send a request with a custom cookie
+```shell
+$ check_http_expect --url https://google.com --find google --cookie "username=test"
+[OK] 1 match found for: "google".
+Http version:  HTTP/1.1
+Http code:     302
+Http info:     Found
+Server:        GFE/2.0
+Url:           https://google.com
+Search:        google
+Num matches:   1
+Matches:
+----------------------------------------
+<A HREF=https://www.google.de/?gfe_rd=cr&amp;ei=B9AxVr7RJerj8weKoa2IBA>here</A>
+```
 
 ## 3. Specific Examples
 
@@ -103,7 +120,7 @@ Matches:
 Find String in Wordpress.com dashboard
 
 ```shell
-$ check_http_expect --url="https://dashboard.wordpress.com/wp-admin/" --find="Recently Published" --lurl="https://wordpress.com/wp-login.php" --ldata="log=USER@EMAIL" --ldata="pwd=PASSWORD" --ldata="rememberme=forever" --ldata="testcookie=1"
+$ check_http_expect --url "https://dashboard.wordpress.com/wp-admin/" --find "Recently Published" --lurl "https://wordpress.com/wp-login.php" --ldata "log=USER@EMAIL" --ldata "pwd=PASSWORD" --ldata "rememberme=forever" --ldata "testcookie=1"
 [OK] 1 match found for: "Recently Published".
 Http version:  HTTP/1.1
 Http code:     200
