@@ -12,9 +12,10 @@
 INFO_NAME="check_http_expect"
 INFO_AUTHOR="Patrick Plocke <patrick@plocke.de>"
 INFO_GPGKEY="0x28BF179F"
-INFO_DATE="2015-12-12"
+INFO_DATE="2016-11-17"
+INFO_LAST_EDITOR="Mathias Scherer <scherer.mat@gmail.com>"
 INFO_LICENSE="MIT"
-INFO_VERSION="0.2"
+INFO_VERSION="0.3"
 
 # Get the path
 export PATH="$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin"
@@ -56,6 +57,7 @@ print_version() {
 	printf "Name:    %s\n" "${INFO_NAME}"
 	printf "Version: %s (%s)\n" "${INFO_VERSION}" "${INFO_DATE}"
 	printf "Author:  %s (%s)\n" "${INFO_AUTHOR}" "${INFO_GPGKEY}"
+	printf "Last Editor: %s\n" "${INFO_LAST_EDITOR}"
 	printf "License: %s\n" "${INFO_LICENSE}"
 	return 0
 }
@@ -65,7 +67,7 @@ print_version() {
 # @output string  The usage screen.
 # @return integer 0
 print_usage() {
-	printf "Usage:  check_http_expect --url=<url> --find=<string> [--huser=<user>] [--hpass=<pass>] [--lurl=<url>] [--ldata==<data> [--ldata=<data>]]\n"
+	printf "Usage:  check_http_expect --url <url> --find <string> [--huser <user>] [--hpass <pass>] [--lurl <url>] [--cookie <data> [--cookie <data>]][--ldata <data> [--ldata <data>]]\n"
 	printf "OR      %s --check\n" "${INFO_NAME}"
 	printf "OR      %s --help\n" "${INFO_NAME}"
 	printf "OR      %s --version\n\n" "${INFO_NAME}"
@@ -85,13 +87,14 @@ print_help() {
 	printf "Check a website (behind .htacess and/or behind POST login) for\n"
 	printf "an expected string or regex expression.\n\n"
 
-	# Show detauls
+	# Show defaults
 	printf "  --url                  Target URL\n"
 	printf "  --find                 Find string in source of Target URL ('grep -E'-style regex allowed)\n"
 	printf "  --huser                [optional] htaccess username\n"
 	printf "  --hpass                [optional] htaccess password\n"
 	printf "  --lurl                 [optional] Url for POST login\n"
-	printf "  --ldata                [optional] POST data (can be specified multiple times)\n\n"
+	printf "  --ldata                [optional] POST data (can be specified multiple times)\n"
+	printf "  --cookie		 [optional] set cookies for request\n\n"
 
 	printf "  --check                Check for program requirements.\n"
 	printf "  --help                 Show this help\n"
@@ -142,37 +145,47 @@ fi
 ############################################################
 
 while [ $# -gt 0  ]; do
-	case "$1" in
+	key=$1
+	shift
+	case $key in
 
 		# Final target url
-		--url=*)
-			url="$(echo "${1}" | sed 's/^--url=//g')"
+		--url)
+			url="$1"
 			;;
 
 		# Post parameter
-		--lurl=*)
-			lurl="$(echo "${1}" | sed 's/^--lurl=//g')"
+		--lurl)
+			lurl="$1"
 			;;
-		--ldata=*)
+		--ldata)
 			# Append multiple data fields
 			if [ -z "$ldata" ]; then
-				ldata="--data \"$(echo "${1}" | sed 's/^--ldata=//g')\""
+				ldata="--data \"$1\""
 			else
-				ldata="${ldata} --data \"$(echo "${1}" | sed 's/^--ldata=//g')\""
+				ldata="${ldata} --data \"$1\""
 			fi
 			;;
 
 		# Htaccess parameters
-		--huser=*)
-			huser="$(echo "${1}" | sed 's/^--huser=//g')"
+		--huser)
+			huser="$1"
 			;;
-		--hpass=*)
-			hpass="$(echo "${1}" | sed 's/^--hpass=//g')"
+		--hpass)
+			hpass="$1"
 			;;
 
 		# String to look for on final url
-		--find=*)
-			find="$(echo "${1}" | sed 's/^--find=//g')"
+		--find)
+			find="$1"
+			;;
+		# Cookies
+		--cookie)
+			if [ -z "$cookies" ]; then
+				cookies="--cookie \"$1\""
+			else
+				cookies="${cookies} --cookie \"$1\""
+			fi
 			;;
 		*)
 			echo "Invalid argument: '${1}'"
@@ -210,6 +223,11 @@ if [ ! -z "$huser" ] || [ ! -z "$hpass" ]; then
 	curl_args="--user-agent \"Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.6) Gecko/20070725 Firefox/2.0.0.6\" --user \"${huser}:${hpass}\""
 else
 	curl_args="--user-agent \"Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.6) Gecko/20070725 Firefox/2.0.0.6\""
+fi
+
+# Add cookies
+if [ ! -z "$cookies" ]; then
+	curl_args="${curl_args} ${cookies}"
 fi
 
 # Login required?
