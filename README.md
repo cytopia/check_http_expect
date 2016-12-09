@@ -6,6 +6,12 @@
 [![Type](https://img.shields.io/badge/type-%2Fbin%2Fsh-red.svg)](https://en.wikipedia.org/?title=Bourne_shell)
 
 
+---
+
+| [![Awesome-Nagios-Plugins](https://raw.githubusercontent.com/cytopia/awesome-nagios-plugins/master/doc/img/awesome-nagios.png)](https://github.com/cytopia/awesome-nagios-plugins) | Find more [awesome nagios plugins](https://github.com/cytopia/awesome-nagios-plugins) |
+|---|---|
+
+---
 Nagios plugin that will check a website (behind .htacess and/or behind POST login) for an expected string based on a simple string or regex expression.
 
 
