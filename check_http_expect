@@ -12,9 +12,9 @@
 INFO_NAME="check_http_expect"
 INFO_AUTHOR="Patrick Plocke <patrick@plocke.de>"
 INFO_GPGKEY="0x28BF179F"
-INFO_DATE="2016-11-17"
+INFO_DATE="2016-12-12"
 INFO_LICENSE="MIT"
-INFO_VERSION="0.3"
+INFO_VERSION="0.4"
 # ADD Addiional authors here
 INFO_CO_AUTHOR1="Mathias Scherer <scherer.mat@gmail.com>"
 
@@ -257,7 +257,6 @@ else
 	# Connect and curl
 	crawl="curl -s -i ${curl_args} ${url}"
 	output="$(eval "${crawl}")"
-	#output="$(curl "${curl_args}" -i -s "${url}")"
 fi
 
 # Split header and content
@@ -283,10 +282,11 @@ if [ "$number" -gt 0 ]; then
 	fi
 	EXIT="$EXIT_OK"
 else
-	printf "[ERROR] No matches found for: \"%s\" | 'Results'=0\n" "${find}"
+	printf "[CRITICAL] No matches found for: \"%s\" | 'Results'=0\n" "${find}"
 	EXIT="$EXIT_ERR"
 fi
 
+# Extended Output
 echo "Http version:  ${http_version}"
 echo "Http code:     ${http_code}"
 echo "Http info:     ${http_info}"
