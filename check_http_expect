@@ -68,7 +68,7 @@ print_version() {
 # @output string  The usage screen.
 # @return integer 0
 print_usage() {
-	printf "Usage:  check_http_expect --url <url> --find <string> [--huser <user>] [--hpass <pass>] [--lurl <url>] [--cookie <data> [--cookie <data>]][--ldata <data> [--ldata <data>]]\n"
+	printf "Usage:  check_http_expect --url <url> --find <string> [--insecure] [--huser <user>] [--hpass <pass>] [--lurl <url>] [--cookie <data> [--cookie <data>]][--ldata <data> [--ldata <data>]]\n"
 	printf "OR      %s --check\n" "${INFO_NAME}"
 	printf "OR      %s --help\n" "${INFO_NAME}"
 	printf "OR      %s --version\n\n" "${INFO_NAME}"
@@ -91,6 +91,7 @@ print_help() {
 	# Show defaults
 	printf "  --url                  Target URL\n"
 	printf "  --find                 Find string in source of Target URL ('grep -E'-style regex allowed)\n"
+	printf "  --insecure             [optional] allow insecure SSL connections\n"
 	printf "  --huser                [optional] htaccess username\n"
 	printf "  --hpass                [optional] htaccess password\n"
 	printf "  --lurl                 [optional] Url for POST login\n"
@@ -153,11 +154,13 @@ while [ $# -gt 0  ]; do
 		# Final target url
 		--url)
 			url="$1"
+			shift
 			;;
 
 		# Post parameter
 		--lurl)
 			lurl="$1"
+			shift
 			;;
 		--ldata)
 			# Append multiple data fields
@@ -166,19 +169,23 @@ while [ $# -gt 0  ]; do
 			else
 				ldata="${ldata} --data \"$1\""
 			fi
+			shift
 			;;
 
 		# Htaccess parameters
 		--huser)
 			huser="$1"
+			shift
 			;;
 		--hpass)
 			hpass="$1"
+			shift
 			;;
 
 		# String to look for on final url
 		--find)
 			find="$1"
+			shift
 			;;
 		# Cookies
 		--cookie)
@@ -187,6 +194,11 @@ while [ $# -gt 0  ]; do
 			else
 				cookies="${cookies} --cookie \"$1\""
 			fi
+			shift
+			;;
+		# Insecure
+		--insecure)
+			insecure="1"
 			;;
 		*)
 			echo "Invalid argument: '${1}'"
@@ -194,7 +206,6 @@ while [ $# -gt 0  ]; do
 			exit 1
 			;;
 	esac
-	shift
 done
 
 
@@ -224,6 +235,10 @@ if [ ! -z "$huser" ] || [ ! -z "$hpass" ]; then
 	curl_args="--user-agent \"Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.6) Gecko/20070725 Firefox/2.0.0.6\" --user \"${huser}:${hpass}\""
 else
 	curl_args="--user-agent \"Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.6) Gecko/20070725 Firefox/2.0.0.6\""
+fi
+
+if [ ! -z "$insecure" ]; then
+	curl_args="-k ${curl_args}"
 fi
 
 # Add cookies
