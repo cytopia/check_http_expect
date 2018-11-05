@@ -10,9 +10,9 @@
 INFO_NAME="check_http_expect"
 INFO_AUTHOR="Patrick Plocke <patrick@plocke.de>"
 INFO_GPGKEY="0x28BF179F"
-INFO_DATE="2016-12-12"
+INFO_DATE="2018-11-05"
 INFO_LICENSE="MIT"
-INFO_VERSION="0.4"
+INFO_VERSION="0.5"
 # ADD Addiional authors here
 INFO_CO_AUTHOR1="Mathias Scherer <scherer.mat@gmail.com>"
 
