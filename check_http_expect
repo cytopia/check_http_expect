@@ -15,6 +15,7 @@ INFO_LICENSE="MIT"
 INFO_VERSION="0.5"
 # ADD Addiional authors here
 INFO_CO_AUTHOR1="Mathias Scherer <scherer.mat@gmail.com>"
+INFO_CO_AUTHOR2="Sylvia van Os <sylvia@hackerchick.me>"
 
 # Get the path
 export PATH="$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin"
@@ -53,11 +54,12 @@ check_requirements() {
 # @output string  The creds.
 # @return integer 0
 print_version() {
-	printf "Name:      %s\n" "${INFO_NAME}"
-	printf "Version:   %s (%s)\n" "${INFO_VERSION}" "${INFO_DATE}"
-	printf "Author:    %s (%s)\n" "${INFO_AUTHOR}" "${INFO_GPGKEY}"
-	printf "Co-Author: %s\n" "${INFO_CO_AUTHOR1}"
-	printf "License:   %s\n" "${INFO_LICENSE}"
+	printf "Name:       %s\n" "${INFO_NAME}"
+	printf "Version:    %s (%s)\n" "${INFO_VERSION}" "${INFO_DATE}"
+	printf "Author:     %s (%s)\n" "${INFO_AUTHOR}" "${INFO_GPGKEY}"
+	printf "Co-Authors: %s\n" "${INFO_CO_AUTHOR1}"
+	printf "            %s\n" "${INFO_CO_AUTHOR2}"
+	printf "License:    %s\n" "${INFO_LICENSE}"
 	return 0
 }
 
