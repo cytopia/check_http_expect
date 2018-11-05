@@ -1,7 +1,5 @@
 #!/bin/sh
 
-# TODO: check against curl
-
 ################################################################################
 #
 # V A R I A B L E S
@@ -116,12 +114,10 @@ print_help() {
 # Check for --check, --help or --version arguments
 ############################################################
 if [ "${1}" = "--check" ]; then
-	check_requirements
-	if [ "$?" -ne "0" ]; then
+	if ! check_requirements; then
 		exit $EXIT_UNKNOWN
-	else
-		exit $EXIT_OK
 	fi
+	exit $EXIT_OK
 fi
 if [ "${1}" = "--help" ]; then
 	print_help
