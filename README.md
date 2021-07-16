@@ -20,15 +20,16 @@ Nagios plugin that will check a website (behind .htacess and/or behind POST logi
 ## 1. Usage
 
 ```shell
-Usage:  check_http_expect --url <url> --find <string> [--huser <user>] [--hpass <pass>] [--lurl <url>] [--cookie <cookie-string> [--cookie <cookie-string>]] [--ldata <data> [--ldata <data>]]
+Usage:  check_http_expect --url <url> --find <string> [--find <another string>] [--huser <user>] [--hpass <pass>] [--lurl <url>] [--cookie <cookie-string> [--cookie <cookie-string>]] [--ldata <data> [--ldata <data>]]
 
   --url         Target URL
-  --find        Find string in source of Target URL ('grep -E'-style regex allowed)
+  --find        Find string in source of Target URL ('grep -E'-style regex allowed / can be specified multiple times)
   --huser       (Optional) htaccess username
   --hpass       (Optional) htaccess password
   --lurl        (Optional) Url for POST login
   --ldata       (Optional) POST data (can be specified multiple times)
   --cookie      (Optional) set cookies for request
+  --ua          (Optional) use this user-agent instead of the default one
 ```
 
 ## 2. Generic Examples
@@ -120,6 +121,31 @@ Matches:
 ----------------------------------------
 <A HREF=https://www.google.de/?gfe_rd=cr&amp;ei=B9AxVr7RJerj8weKoa2IBA>here</A>
 ```
+
+### 2.6 Multiple Search-Strings and different user-agent
+When searching for multiple strings on the same page, its not necessary to do multiple requests. 
+Just specify as many `find`-parameters as you need.
+You may want to change the user-agent with the parameter `ua` as well, in order to avoid undesired redirects.
+```shell
+$ check_hmg_http_expect --url "https://duckduckgo.com" --find "<title>DuckDuckGo — Privacy, simplified.</title>" --find "<span class=\"logo_homepage__tt\">Duck it\!</span>" --find "NO-MATCH" --ua "curl/7.37.0"
+[WARN] Not all matches found for: "<title>DuckDuckGo — Privacy, simplified.</title>
+<span class="logo_homepage__tt">Duck it\!</span>
+NO-MATCH" | 'Results'=2 but expected: 3
+Http version:  HTTP/2
+Http code:     200
+Http info:     
+Server:        
+Url:           https://duckduckgo.com
+Search:        <title>DuckDuckGo — Privacy, simplified.</title> 
+               <span class="logo_homepage__tt">Duck it\!</span> 
+               NO-MATCH
+               
+Num matches:   2
+Matches:
+----------------------------------------
+        <title>DuckDuckGo — Privacy, simplified.</title>                                <span class="logo_homepage__tt">Duck it!</span>
+```
+If only some of the specified search-strings are matched, then a warning is returned. 
 
 ## 3. Specific Examples
 

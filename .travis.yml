@@ -6,5 +6,5 @@ before_script:
   - sudo apt-get install -qq shellcheck
 
 script:
-  - shellcheck --shell=sh check_http_expect
+  - shellcheck --shell=bash check_http_expect
 
