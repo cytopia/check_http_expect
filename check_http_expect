@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 ################################################################################
 #
@@ -188,7 +188,7 @@ while [ $# -gt 0  ]; do
 
 		# String to look for on final url
 		--find)
-      searchStrings+=("$1")
+			searchStrings+=("$1")
 			shift
 			;;
 		# Cookies
@@ -204,10 +204,10 @@ while [ $# -gt 0  ]; do
 		--insecure)
 			insecure="1"
 			;;
-	  --ua)
-	    useragent="$1"
-	    shift 
-	    ;;
+		--ua)
+			useragent="$1"
+			shift 
+			;;
 		*)
 			echo "Invalid argument: '${1}'"
 			print_usage
@@ -298,14 +298,14 @@ matchingStringAmount=0
 expectedMatches=${#searchStrings[@]}
 i=0
 while [ $i -lt "$expectedMatches" ]; do
-    el=${searchStrings[$i]}
-    number=$(echo "${data}" | grep -cE "${el}")
-    match+="$(echo "${data}" | grep -E "${el}")"
-    numberOfResults=$((numberOfResults + number))
-    if [ "$number" -gt 0 ]; then
-        matchingStringAmount=$((matchingStringAmount + 1))
-    fi
-    ((i++))
+		el=${searchStrings[$i]}
+		number=$(echo "${data}" | grep -cE "${el}")
+		match+="$(echo "${data}" | grep -E "${el}")"
+		numberOfResults=$((numberOfResults + number))
+		if [ "$number" -gt 0 ]; then
+				matchingStringAmount=$((matchingStringAmount + 1))
+		fi
+		((i++))
 done
 
 
@@ -317,7 +317,7 @@ if [ "${expectedMatches}" -eq ${matchingStringAmount} ]; then
 	fi
 	EXIT="$EXIT_OK"
 elif [ ${matchingStringAmount} -gt 0 ]; then
-    printf "[WARN] Not all matches found for: \"%s\" | 'Results'=%d but expected: %d\n" "$(printf "%s\n" "${searchStrings[@]}")" "${matchingStringAmount}" "${expectedMatches}"
+		printf "[WARN] Not all matches found for: \"%s\" | 'Results'=%d but expected: %d\n" "$(printf "%s\n" "${searchStrings[@]}")" "${matchingStringAmount}" "${expectedMatches}"
 	EXIT="$EXIT_WARN"
 else 
 	printf "[CRITICAL] No matches found for: \"%s\" | 'Results'=0\n" "$(printf "%s\n" "${searchStrings[@]}")"
