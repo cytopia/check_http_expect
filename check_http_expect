@@ -31,6 +31,7 @@ EXIT_UNKNOWN=3
 # defaults
 useragent="Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.6) Gecko/20070725 Firefox/2.0.0.6"
 searchStrings=()
+avoidStrings=()
 
 ################################################################################
 #
@@ -74,7 +75,7 @@ print_version() {
 # @output string  The usage screen.
 # @return integer 0
 print_usage() {
-	printf "Usage:  check_http_expect --url <url> --find <string> [--insecure] [--huser <user>] [--hpass <pass>] [--lurl <url>] [--cookie <data> [--cookie <data>]][--ldata <data> [--ldata <data>]]\n"
+	printf "Usage:  check_http_expect --url <url> --find <string> [--avoid <string>] [--insecure] [--huser <user>] [--hpass <pass>] [--lurl <url>] [--cookie <data> [--cookie <data>]][--ldata <data> [--ldata <data>]]\n"
 	printf "OR      %s --check\n" "${INFO_NAME}"
 	printf "OR      %s --help\n" "${INFO_NAME}"
 	printf "OR      %s --version\n\n" "${INFO_NAME}"
@@ -97,12 +98,14 @@ print_help() {
 	# Show defaults
 	printf "  --url                  Target URL\n"
 	printf "  --find                 Find string in source of Target URL ('grep -E'-style regex allowed)\n"
+	printf "  --avoid                [required if find is not specified] ensure that the string does not appear in the source of Target URL\n"
 	printf "  --insecure             [optional] allow insecure SSL connections\n"
 	printf "  --huser                [optional] htaccess username\n"
 	printf "  --hpass                [optional] htaccess password\n"
 	printf "  --lurl                 [optional] Url for POST login\n"
 	printf "  --ldata                [optional] POST data (can be specified multiple times)\n"
-	printf "  --cookie		 [optional] set cookies for request\n\n"
+	printf "  --cookie               [optional] set cookies for request\n"
+	printf "  --ua                   [optional] use this user-agent instead of the default one\n\n"
 
 	printf "  --check                Check for program requirements.\n"
 	printf "  --help                 Show this help\n"
@@ -110,7 +113,15 @@ print_help() {
 	return 0
 }
 
-
+print_search() {
+	local separator=$1
+	if [ "${#searchStrings[@]}" -gt 0 ]; then
+		printf "%s\n${separator}" "${searchStrings[@]}"
+	fi
+	if [ "${#avoidStrings[@]}" -gt 0 ]; then
+		printf "[NOT] %s\n${separator}" "${avoidStrings[@]}"
+	fi
+}
 
 ################################################################################
 #
@@ -191,6 +202,10 @@ while [ $# -gt 0  ]; do
 			searchStrings+=("$1")
 			shift
 			;;
+		--avoid)
+			avoidStrings+=("$1")
+			shift
+			;;
 		# Cookies
 		--cookie)
 			if [ -z "$cookies" ]; then
@@ -227,7 +242,7 @@ if [ -z "$url" ]; then
 	exit 1
 fi
 
-if [ "${#searchStrings[@]}" -eq 0 ]; then
+if [[ "${#searchStrings[@]}" -eq 0  &&  "${#avoidStrings[@]}" -eq 0 ]]; then
 	echo "Error, You must specify what you are looking for."
 	print_usage
 	exit 1
@@ -295,9 +310,10 @@ http_server="$(echo "${head}" | head -n20 | grep -E '^Server:\s' | sed 's/^Serve
 match=""
 numberOfResults=0
 matchingStringAmount=0
-expectedMatches=${#searchStrings[@]}
+expectedMatches=$((${#searchStrings[@]} + ${#avoidStrings[@]}))
+
 i=0
-while [ $i -lt "$expectedMatches" ]; do
+while [ $i -lt "${#searchStrings[@]}" ]; do
 		el=${searchStrings[$i]}
 		number=$(echo "${data}" | grep -cE "${el}")
 		match+="$(echo "${data}" | grep -E "${el}")"
@@ -308,19 +324,30 @@ while [ $i -lt "$expectedMatches" ]; do
 		((i++))
 done
 
+i=0
+while [ $i -lt "${#avoidStrings[@]}" ]; do
+	el=${avoidStrings[$i]}
+	number=$(echo "${data}" | grep -cE "${el}")
+	if [ "$number" -eq 0 ]; then
+		match+=" [NOT] ${el}"
+		matchingStringAmount=$((matchingStringAmount + 1))
+	fi
+	((i++))
+done
+
 
 if [ "${expectedMatches}" -eq ${matchingStringAmount} ]; then
-	if [ "$number" = "1" ]; then
-		printf "[OK] 1 match found for: \"%s\" | 'Results'=%d\n" "$(printf "%s\n" "${searchStrings[@]}")" "${numberOfResults}"
+	if [ "$numberOfResults" = "1" ]; then
+		printf "[OK] 1 match found for: \"%s\" | 'Results'=%d\n" "$(print_search)" "${numberOfResults}"
 	else
-		printf "[OK] %d matches found for: \"%s\" | 'Results'=%d\n" "${numberOfResults}" "$(printf "%s\n" "${searchStrings[@]}")" "${numberOfResults}"
+		printf "[OK] %d matches found for: \"%s\" | 'Results'=%d\n" "${numberOfResults}" "$(print_search)" "${numberOfResults}"
 	fi
 	EXIT="$EXIT_OK"
 elif [ ${matchingStringAmount} -gt 0 ]; then
-		printf "[WARN] Not all matches found for: \"%s\" | 'Results'=%d but expected: %d\n" "$(printf "%s\n" "${searchStrings[@]}")" "${matchingStringAmount}" "${expectedMatches}"
+		printf "[WARN] Not all matches found for: \"%s\" | 'Results'=%d but expected: %d\n" "$(print_search)" "${matchingStringAmount}" "${expectedMatches}"
 	EXIT="$EXIT_WARN"
 else 
-	printf "[CRITICAL] No matches found for: \"%s\" | 'Results'=0\n" "$(printf "%s\n" "${searchStrings[@]}")"
+	printf "[CRITICAL] No matches found for: \"%s\" | 'Results'=0\n" "$(print_search)"
 	EXIT="$EXIT_ERR"
 fi
 
@@ -331,7 +358,7 @@ echo "Http info:     ${http_info}"
 echo "Server:        ${http_server}"
 echo "Url:           ${url}"
 #echo "Post Data:     ${ldata}"
-echo "Search:        $(printf "%s\n\t\t" "${searchStrings[@]}")"
+echo "Search:        $(print_search '\t\t')"
 echo "Num matches:   ${numberOfResults}"
 echo "Matches:"
 echo "----------------------------------------"
