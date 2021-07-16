@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 ################################################################################
 #
@@ -10,22 +10,27 @@
 INFO_NAME="check_http_expect"
 INFO_AUTHOR="Patrick Plocke <patrick@plocke.de>"
 INFO_GPGKEY="0x28BF179F"
-INFO_DATE="2018-11-05"
+INFO_DATE="2021-07-16"
 INFO_LICENSE="MIT"
 INFO_VERSION="0.5"
-# ADD Addiional authors here
+# ADD Additional authors here
 INFO_CO_AUTHOR1="Mathias Scherer <scherer.mat@gmail.com>"
 INFO_CO_AUTHOR2="Sylvia van Os <sylvia@hackerchick.me>"
+INFO_CO_AUTHOR3="Martin Drößler <m.droessler@handelsblattgroup.com>"
+
 
 # Get the path
 export PATH="$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin"
 
 # Nagios error codes
 EXIT_OK=0
-#EXIT_WARN=1
+EXIT_WARN=1
 EXIT_ERR=2
 EXIT_UNKNOWN=3
 
+# defaults
+useragent="Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.6) Gecko/20070725 Firefox/2.0.0.6"
+searchStrings=()
 
 ################################################################################
 #
@@ -59,6 +64,7 @@ print_version() {
 	printf "Author:     %s (%s)\n" "${INFO_AUTHOR}" "${INFO_GPGKEY}"
 	printf "Co-Authors: %s\n" "${INFO_CO_AUTHOR1}"
 	printf "            %s\n" "${INFO_CO_AUTHOR2}"
+	printf "            %s\n" "${INFO_CO_AUTHOR3}"
 	printf "License:    %s\n" "${INFO_LICENSE}"
 	return 0
 }
@@ -182,7 +188,7 @@ while [ $# -gt 0  ]; do
 
 		# String to look for on final url
 		--find)
-			find="$1"
+      searchStrings+=("$1")
 			shift
 			;;
 		# Cookies
@@ -198,6 +204,10 @@ while [ $# -gt 0  ]; do
 		--insecure)
 			insecure="1"
 			;;
+	  --ua)
+	    useragent="$1"
+	    shift 
+	    ;;
 		*)
 			echo "Invalid argument: '${1}'"
 			print_usage
@@ -217,7 +227,7 @@ if [ -z "$url" ]; then
 	exit 1
 fi
 
-if [ -z "$find" ]; then
+if [ "${#searchStrings[@]}" -eq 0 ]; then
 	echo "Error, You must specify what you are looking for."
 	print_usage
 	exit 1
@@ -230,9 +240,9 @@ fi
 
 # Add htacess parameters
 if [ ! -z "$huser" ] || [ ! -z "$hpass" ]; then
-	curl_args="--user-agent \"Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.6) Gecko/20070725 Firefox/2.0.0.6\" --user \"${huser}:${hpass}\""
+	curl_args="--user-agent \"${useragent}\" --user \"${huser}:${hpass}\""
 else
-	curl_args="--user-agent \"Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.6) Gecko/20070725 Firefox/2.0.0.6\""
+	curl_args="--user-agent \"${useragent}\""
 fi
 
 if [ ! -z "$insecure" ]; then
@@ -282,20 +292,35 @@ http_code="$(echo "${http_status}" | awk '{print $2}')"
 http_info="$(echo "${http_status}" | awk '{for (i=3; i<NF; i++) printf $i " "; print $NF}')"
 http_server="$(echo "${head}" | head -n20 | grep -E '^Server:\s' | sed 's/^Server:\s//g')"
 
+match=""
+numberOfResults=0
+matchingStringAmount=0
+expectedMatches=${#searchStrings[@]}
+i=0
+while [ $i -lt "$expectedMatches" ]; do
+    el=${searchStrings[$i]}
+    number=$(echo "${data}" | grep -cE "${el}")
+    match+="$(echo "${data}" | grep -E "${el}")"
+    numberOfResults=$((numberOfResults + number))
+    if [ "$number" -gt 0 ]; then
+        matchingStringAmount=$((matchingStringAmount + 1))
+    fi
+    ((i++))
+done
 
 
-number="$(echo "${data}" | grep -cE "${find}")"
-match="$(echo "${data}" | grep -E "${find}" | xargs)"
-
-if [ "$number" -gt 0 ]; then
+if [ "${expectedMatches}" -eq ${matchingStringAmount} ]; then
 	if [ "$number" = "1" ]; then
-		printf "[OK] 1 match found for: \"%s\" | 'Results'=%d\n" "${find}" "${number}"
+		printf "[OK] 1 match found for: \"%s\" | 'Results'=%d\n" "$(printf "%s\n" "${searchStrings[@]}")" "${numberOfResults}"
 	else
-		printf "[OK] %d matches found for: \"%s\" | 'Results'=%d\n" "${number}" "${find}" "${number}"
+		printf "[OK] %d matches found for: \"%s\" | 'Results'=%d\n" "${numberOfResults}" "$(printf "%s\n" "${searchStrings[@]}")" "${numberOfResults}"
 	fi
 	EXIT="$EXIT_OK"
-else
-	printf "[CRITICAL] No matches found for: \"%s\" | 'Results'=0\n" "${find}"
+elif [ ${matchingStringAmount} -gt 0 ]; then
+    printf "[WARN] Not all matches found for: \"%s\" | 'Results'=%d but expected: %d\n" "$(printf "%s\n" "${searchStrings[@]}")" "${matchingStringAmount}" "${expectedMatches}"
+	EXIT="$EXIT_WARN"
+else 
+	printf "[CRITICAL] No matches found for: \"%s\" | 'Results'=0\n" "$(printf "%s\n" "${searchStrings[@]}")"
 	EXIT="$EXIT_ERR"
 fi
 
@@ -306,11 +331,10 @@ echo "Http info:     ${http_info}"
 echo "Server:        ${http_server}"
 echo "Url:           ${url}"
 #echo "Post Data:     ${ldata}"
-echo "Search:        ${find}"
-echo "Num matches:   ${number}"
+echo "Search:        $(printf "%s\n\t\t" "${searchStrings[@]}")"
+echo "Num matches:   ${numberOfResults}"
 echo "Matches:"
 echo "----------------------------------------"
 echo "${match}"
 
 exit "$EXIT"
-

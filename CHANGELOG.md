@@ -1,3 +1,10 @@
+Version 0.5
+-----------
+- [Enh]     Support specifying multiple search-strings
+- [Enh]     Support changing the user-agent
+- [Enh]     Added simple config/example for an icinga CheckCommand and Service
+- [Cha]     Use bash instead of sh
+
 Version 0.3 (unreleased)
 -----------
 
